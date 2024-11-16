@@ -1,23 +1,23 @@
-# TestTrek
+# IdentityX
 
 ## Description
-An open-source online exam platform for seamless, secure, and customizable exam management.
+This is the Auth project, which provides authentication and authorization services for the application. The project includes features for user registration, login, and role-based access control using JWT authentication.
 
 ## Features
-- User-friendly interface for both exam-takers and administrators
-- Secure login and session management
-- Customizable exam creation and scheduling
-- Real-time exam monitoring
-- Detailed results and analytics
+- User Registration
+- User Login
+- JWT Authentication
+- Role-based Authorization
+- Secure Password Storage using BCrypt
 
 ## Installation
 1. Clone the repository:
     ```sh
-    git clone https://github.com/hritam-mondal/TestTrek.git
+    git clone https://github.com/hritam-mondal/IdentityX.git
     ```
 2. Navigate to the project directory:
     ```sh
-    cd TestTrek.API
+    cd IdentityX.API
     ```
 3. Install dependencies and set up the environment:
     ```sh
