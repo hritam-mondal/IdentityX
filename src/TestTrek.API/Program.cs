@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using TestTrek.API;
+using Serilog;
 using TestTrek.API.Endpoints;
 using TestTrek.Core.Interfaces;
 using TestTrek.Infrastructure.Data;
@@ -63,6 +63,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Add Serilog configuration
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration) // Read settings from appsettings.json
+    .Enrich.FromLogContext()
+    .WriteTo.Console() // Logs to console
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day) // Logs to a file
+    .CreateLogger();
+
+// Replace default logger
+builder.Host.UseSerilog();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -81,5 +92,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthEndpoints();
 app.MapUsersEndpoints();
+app.UseSerilogRequestLogging();
 
 app.Run();
