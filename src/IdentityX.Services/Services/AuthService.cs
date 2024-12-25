@@ -69,43 +69,47 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
 
     public async Task<LoginResponseDto> LoginAsync(UserLoginDto userLoginDto)
     {
-        logger.LogInformation("Login attempt for user: {Username}", userLoginDto.Username);
-
-        // Fetch the user
-        var user = await userRepository.GetUserByUsernameAsync(userLoginDto.Username);
+        logger.LogInformation("Login attempt for user: {UsernameOrEmail}", userLoginDto.Identifier);
+    
+        // Determine if input is an email or username
+        var isEmail = userLoginDto.Identifier.Contains('@');
+        var user = isEmail
+            ? await userRepository.GetUserByEmailAsync(userLoginDto.Identifier ) // Fetch user by email
+            : await userRepository.GetUserByUsernameAsync(userLoginDto.Identifier ); // Fetch user by username
+    
         if (user == null)
         {
-            logger.LogWarning("Login failed: User with Username: {Username} not found.", userLoginDto.Username);
+            logger.LogWarning("Login failed: User with Username or Email: {UsernameOrEmail} not found.", userLoginDto.Identifier );
             return new LoginResponseDto
             {
                 Status = "error",
                 Message = "Login failed.",
                 Errors = new Dictionary<string, string>
                 {
-                    { "credentials", "Invalid username or password." }
+                    { "credentials", "Invalid username/email or password." }
                 }
             };
         }
-
+    
         // Verify password
         if (!BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.PasswordHash))
         {
-            logger.LogWarning("Login failed: Invalid password for Username: {Username}", userLoginDto.Username);
+            logger.LogWarning("Login failed: Invalid password for Username or Email: {UsernameOrEmail}", userLoginDto.Identifier);
             return new LoginResponseDto
             {
                 Status = "error",
                 Message = "Login failed.",
                 Errors = new Dictionary<string, string>
                 {
-                    { "credentials", "Invalid username or password." }
+                    { "credentials", "Invalid username/email or password." }
                 }
             };
         }
-
+    
         // Generate token
         var token = GenerateJwtToken(user);
-        logger.LogInformation("Login successful for user: {Username}", userLoginDto.Username);
-
+        logger.LogInformation("Login successful for user: {UsernameOrEmail}", userLoginDto.Identifier);
+    
         return new LoginResponseDto
         {
             Status = "success",
