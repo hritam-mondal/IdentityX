@@ -7,22 +7,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRole { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Role>().HasData(
+            new Role { Id = 1, Name = "Admin" },
+            new Role { Id = 2, Name = "User" }
+        );
+        
         // Configure composite primary key for UserRole
         modelBuilder.Entity<UserRole>()
             .HasKey(ur => new { ur.UserId, ur.RoleId });
 
-        // Define relationships
+        // Configure relationships
         modelBuilder.Entity<UserRole>()
-            .HasOne(ur => ur.User)
+            .HasOne<User>() // Explicitly reference the User entity
             .WithMany(u => u.UserRoles)
-            .HasForeignKey(ur => ur.UserId);
+            .HasForeignKey(ur => ur.UserId)
+            .IsRequired();
 
         modelBuilder.Entity<UserRole>()
-            .HasOne(ur => ur.Role)
+            .HasOne<Role>() // Explicitly reference the Role entity
             .WithMany(r => r.UserRoles)
-            .HasForeignKey(ur => ur.RoleId);
+            .HasForeignKey(ur => ur.RoleId)
+            .IsRequired();
     }
 }

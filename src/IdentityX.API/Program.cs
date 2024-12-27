@@ -59,8 +59,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")!,
-        b => b.MigrationsAssembly("TesTestTrek.API")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")!,
+        b => b.MigrationsAssembly("IdentityX.API")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -87,8 +87,10 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -105,6 +107,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthEndpoints();
 app.MapUsersEndpoints();
+app.MapRolesEndpoints();
 app.UseSerilogRequestLogging();
 
 app.Run();

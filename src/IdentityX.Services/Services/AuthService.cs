@@ -10,7 +10,7 @@ using IdentityX.Core.Interfaces;
 
 namespace IdentityX.Services.Services;
 
-public class AuthService(IUserRepository userRepository, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
+public class AuthService(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
 {
     public async Task<RegisterResponseDto> RegisterAsync(RegisterDto registerDto)
     {
@@ -42,11 +42,33 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
             Email = registerDto.Email,
             Username = registerDto.Username,
             PasswordHash = hashedPassword,
-            UserRoles = [] // Initialize as empty
         };
 
         await userRepository.RegisterUserAsync(user);
-        logger.LogInformation("User registered successfully: {Username}", user.Username);
+        // Retrieve the role
+        var role = await roleRepository.GetRoleByNameAsync(registerDto.Role).ConfigureAwait(false);
+        if (role == null)
+        {
+            logger.LogError("Role not found: {Role}", registerDto.Role);
+            return GenerateErrorResponse("role", "Invalid role.");
+        }
+
+        // Create UserRole using the persisted UserId
+        var userRole = new UserRole
+        {
+            UserId = user.Id,
+            RoleId = role.Id
+        };
+        Console.WriteLine(userRole);
+
+        // Associate the UserRole with the user
+        user.UserRoles = [userRole];
+
+        // Save the UserRole to the database
+        await userRepository.AddUserRoleAsync(userRole).ConfigureAwait(false);
+
+        logger.LogInformation("User registered successfully with roles: {Username}", user.Username);
+
 
         // Generate token
         var token = GenerateJwtToken(user);
@@ -149,5 +171,18 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
         logger.LogDebug("JWT token created successfully for user: {Username}", user?.Username);
 
         return tokenHandler.WriteToken(token);
+    }
+    
+    private static RegisterResponseDto GenerateErrorResponse(string field, string errorMessage)
+    {
+        return new RegisterResponseDto
+        {
+            Status = "error",
+            Message = "Registration failed.",
+            Errors = new Dictionary<string, string>
+            {
+                { field, errorMessage }
+            }
+        };
     }
 }

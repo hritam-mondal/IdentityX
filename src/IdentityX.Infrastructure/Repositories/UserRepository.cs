@@ -28,8 +28,18 @@ public class UserRepository(AppDbContext context) : IUserRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task<List<User?>> GetAllUsersAsync()
+    public async Task<List<User>> GetAllUsersAsync()
     {
         return await context.Users.ToListAsync();
+    }
+    
+    public async Task AddUserRoleAsync(UserRole userRole)
+    {
+        if (userRole == null)
+        {
+            throw new ArgumentNullException(nameof(userRole), "UserRole cannot be null.");
+        }
+        context.UserRole.Add(userRole);
+        await context.SaveChangesAsync();
     }
 }
