@@ -10,7 +10,11 @@ using IdentityX.Core.Interfaces;
 
 namespace IdentityX.Services.Services;
 
-public class AuthService(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
+public class AuthService(
+    IUserRepository userRepository,
+    IRoleRepository roleRepository,
+    IConfiguration configuration,
+    ILogger<AuthService> logger) : IAuthService
 {
     public async Task<RegisterResponseDto> RegisterAsync(RegisterDto registerDto)
     {
