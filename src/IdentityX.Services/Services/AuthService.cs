@@ -157,19 +157,17 @@ public class AuthService(IUserRepository userRepository, IRoleRepository roleRep
         // Create token descriptor
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
+            Subject = new ClaimsIdentity([
                 new Claim(ClaimTypes.Name, user!.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email)
-            }),
+            ]),
             Expires = DateTime.UtcNow.AddDays(7),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        logger.LogDebug("JWT token created successfully for user: {Username}", user?.Username);
-
+        logger.LogDebug("JWT token created successfully for user: {Username}", user.Username);
         return tokenHandler.WriteToken(token);
     }
     
