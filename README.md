@@ -132,4 +132,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For any questions or inquiries, please contact:
-- **Hritam Mondal** - [hritam.mondal@example.com](mailto:hritam.mondal@example.com)
+- **Hritam Mondal** - [hritam.mondal@example.com](mailto:hritam.mondal@yahoo.com)
